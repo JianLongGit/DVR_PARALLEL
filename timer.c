@@ -1,3 +1,9 @@
+/*
+ * timer.c
+ *
+ *  Created on: 2022-03-28
+ *      Author: WangJianLong
+ */
 #include "timer.h"
 
 /***************************************
@@ -13,7 +19,7 @@ void TIM3_Int_Init(u16 arr,u16 psc, u16 DIV)
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3,ENABLE);  ///使能TIM3时钟
 	
 	TIM_TimeBaseInitStructure.TIM_Period = arr; 	//自动重装载值
-	TIM_TimeBaseInitStructure.TIM_Prescaler=psc;  //定时器分频
+	TIM_TimeBaseInitStructure.TIM_Prescaler=psc;  	//定时器分频
 	TIM_TimeBaseInitStructure.TIM_CounterMode=TIM_CounterMode_Down; //向下计数模式
 	TIM_TimeBaseInitStructure.TIM_ClockDivision=DIV; 
 	

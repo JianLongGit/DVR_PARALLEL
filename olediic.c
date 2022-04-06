@@ -71,20 +71,16 @@ uint16_t OledI2CSendData(struct OLEDI2CSTRUCT *OledI2CCtrl)
 			{
 				I2C_GenerateSTART(I2C1, ENABLE);
 				fd->OledI2CState = OledI2cSlaveAddr;
-				//printf("1\r\n");
 			}
 			return BUSY;
-			//break;
 		
 		case OledI2cSlaveAddr: 
 			if(I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_MODE_SELECT))//判断EV5事件是否产生
 			{
 				I2C_Send7bitAddress(I2C1, OLEDSLAVEADDR, I2C_Direction_Transmitter);
 				fd->OledI2CState = OledI2cRegAddr;
-				//printf("2\r\n");
 			}
 			return BUSY;
-			//break;
 		
 		case OledI2cRegAddr:
 			if(I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED))//判断EV6（主发送）事件是否产生
@@ -93,41 +89,30 @@ uint16_t OledI2CSendData(struct OLEDI2CSTRUCT *OledI2CCtrl)
 				flag = I2C1->SR2;//软件需先读取SR1寄存器，在读取SR2寄存器才能清除ADDR位
 				I2C_SendData(I2C1, fd->OledI2cDataInfor.Byte.Addr);
 				fd->OledI2CState = OledI2cData;
-				//printf("3\r\n");
 			}
 			return BUSY;
-			//break;
 		
 		case OledI2cData:
 			if(I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTING))//判断EV8事件是否产生
 			{
 				I2C_SendData(I2C1, fd->OledI2cDataInfor.Byte.Data);
 				fd->OledI2CState = OledI2cStop;
-				//printf("4\r\n");
 			}
-			return BUSY;
-			//break;			
+			return BUSY;			
 		
 		case OledI2cStop:
 			if(I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTED))//判断EV8_2事件是否产生
 			{
 				I2C_GenerateSTOP(I2C1, ENABLE);
 				fd->OledI2CState = OledI2cInactive;
-				//printf("5\r\n");
 				return SUCCESS;
 			}
-			else
-			{
-				return BUSY;
-			}
-			//break;
+			return BUSY;
 			
 		case OledI2cLoop:
 			return BUSY;
-			//break;
 		
 		default:
 			return BUSY;
-			//break;
 	}
 }

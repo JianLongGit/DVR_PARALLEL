@@ -1,7 +1,7 @@
 #ifndef OLED_H_
 #define OLED_H_
 
-#include "oledindex.h"
+#include "oledconfig.h"
 #include "stdlib.h"
 
 
