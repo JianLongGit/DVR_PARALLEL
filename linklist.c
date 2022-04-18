@@ -8,14 +8,14 @@
 #include "linklist.h"
 
 /*******************************************************************************
-* 函数功能: 申请链表头
-* 输入参数: 数据区域的大小
-* 输出参数: 头节点
-* 函数说明: 无
+* 函数功能: 申请链表节点
+* 输入参数: 
+* 输出参数: 头节点的首地址
+* 函数说明: 
 *******************************************************************************/
-struct DOUBLELINKLIST* LinklistCareate(int Size)
+struct DOUBLELINKLISTNODE* LinklistCareate(void)
 {
-	struct DOUBLELINKLIST *LinklistHead;
+	struct DOUBLELINKLISTNODE* LinklistHead;
 	
 	LinklistHead = malloc(sizeof(*LinklistHead));//申请链表头
 	if (LinklistHead == NULL)
@@ -23,54 +23,35 @@ struct DOUBLELINKLIST* LinklistCareate(int Size)
 		return NULL;
 	}
 
-	LinklistHead->DataSize = Size;
-	LinklistHead->HeadNode->Data = NULL;
-	LinklistHead->HeadNode->Next = LinklistHead->HeadNode;
-	LinklistHead->HeadNode->Prev = LinklistHead->HeadNode;
+	LinklistHead->Next = LinklistHead;
+	LinklistHead->Prev = LinklistHead;
 
 	return LinklistHead;
 }
 
 /*******************************************************************************
 * 函数功能: 数据插入链表
-* 输入参数: 链表头部、待插入的数据、插入方式（首部模式/尾部模式）
+* 输入参数: *LinklistHead：链表头部首地址。*Data：待插入的数据。插入方式（首部模式/尾部模式）
 * 输出参数: 
 * 函数说明: 无
 *******************************************************************************/
-uint16_t DataInsertLinklist(struct DOUBLELINKLIST* LinklistHead, const void *Data, uint16_t Mode)
+uint16_t DataInsertLinklist(struct DOUBLELINKLISTNODE* LinklistHead, struct LINKLISTDATATYPE* Data)
 {
-	struct DOUBLELINKLIST* Linklist = LinklistHead;
-	struct DOUBLELINKLISTNODE *NewNode;
+	struct DOUBLELINKLISTNODE* Head = LinklistHead;
+	struct DOUBLELINKLISTNODE* NewNode = NULL;
 	
 	//申请节点
-	NewNode = malloc(sizeof(NewNode));
+	NewNode = (struct DOUBLELINKLISTNODE*)malloc(sizeof(*NewNode));
+	
 	if(NewNode == NULL)
 		return MALLOCFAIL;
 	
-	//申请数据空间
-	NewNode->Data = malloc(sizeof(Linklist->DataSize));
-	if(NewNode->Data == NULL)
-		return MALLOCFAIL;
-	
 	//将传入的数据copy到申请节点的数据空间中
-	memcpy(NewNode->Data, Data, Linklist->DataSize);
+	NewNode->Data = (*Data);
 	
-	//根据选择的插入方式 将申请的节点插入链表
-	switch(Mode)
-	{
-		case FirstMode: //首部插入
-			NewNode->Prev = Linklist->HeadNode;
-			NewNode->Next= Linklist->HeadNode->Next;
-			break;
-		case BackMode: 	//尾部插入
-			NewNode->Prev = Linklist->HeadNode->Prev;
-			NewNode->Next = Linklist->HeadNode;
-			break;
-		default:		//首部插入
-			NewNode->Prev = Linklist->HeadNode;
-			NewNode->Next= Linklist->HeadNode->Next;
-			break;
-	}
+	//将申请的节点插入链表首部
+	NewNode->Prev = Head;
+	NewNode->Next= Head->Next;
 	NewNode->Prev->Next = NewNode;
 	NewNode->Next->Prev = NewNode;
 	
@@ -78,47 +59,31 @@ uint16_t DataInsertLinklist(struct DOUBLELINKLIST* LinklistHead, const void *Dat
 }
 
 /*******************************************************************************
-* 函数功能: 	取出链表数据
+* 函数功能: 取出链表数据
 * 输入参数: 链表头部、取数据方式（首部/尾部）
 * 输出参数: 无
 * 函数说明: 无
 *******************************************************************************/
-uint16_t FetchLinklistData(struct DOUBLELINKLIST* LinklistHead, void *SaveData, uint16_t Mode)
+uint16_t FetchLinklistData(struct DOUBLELINKLISTNODE* LinklistHead, struct LINKLISTDATATYPE* SaveData)
 {
-	struct DOUBLELINKLIST* Linklist = LinklistHead;
-	struct DOUBLELINKLISTNODE *NewNode;
+	struct DOUBLELINKLISTNODE* Head = LinklistHead;
+	struct DOUBLELINKLISTNODE* NewNode;
 	uint16_t ret = 0;
 	
 	//判断链表是否为空
-	ret = EmptyCheak(Linklist);
+	ret = EmptyCheak(Head);
 	if(ret == LLISTEMPTY)
-		return LLISTNOEMPTY;
+		return LLISTEMPTY;
 	
 	//根据选择取出的方式 从链表中取出节点
-	switch(Mode)
-	{
-		case FirstMode:
-			NewNode = Linklist->HeadNode->Next;
-			Linklist->HeadNode->Next = NewNode->Next;
-			NewNode->Next->Prev = Linklist->HeadNode;
-			break;
-		case BackMode:
-			NewNode = Linklist->HeadNode->Prev;
-			Linklist->HeadNode->Prev = NewNode->Prev;
-			NewNode->Prev->Next = Linklist->HeadNode;
-			break;
-		default:
-			NewNode = Linklist->HeadNode->Prev;
-			Linklist->HeadNode->Prev = NewNode->Prev;
-			NewNode->Prev->Next = Linklist->HeadNode;
-			break;
-	}
+	NewNode = Head->Prev;
+	Head->Prev = NewNode->Prev;
+	Head->Prev->Next = Head;
 	
-	//将取出节点的数据区数据copy到要保存的结构体中
-	memcpy(SaveData, NewNode->Data, Linklist->DataSize);
+	//将取出的节点数据copy到要保存的数据空间中
+	(*SaveData) = NewNode->Data;
 	
 	//释放节点
-	free(NewNode->Data);
 	free(NewNode);
 	
 	return FETCHSUCCESS;
@@ -130,11 +95,11 @@ uint16_t FetchLinklistData(struct DOUBLELINKLIST* LinklistHead, void *SaveData, 
 * 输出参数: 链表为空/链表非空
 * 函数说明: 无
 *******************************************************************************/
-uint16_t EmptyCheak(struct DOUBLELINKLIST* LinklistHead)
+uint16_t EmptyCheak(struct DOUBLELINKLISTNODE* LinklistHead)
 {
-	struct DOUBLELINKLIST *Linklist = LinklistHead;
+	struct DOUBLELINKLISTNODE* Head = LinklistHead;
 	
-	if(Linklist->HeadNode->Next == Linklist->HeadNode)
+	if(Head->Next == Head)
 		return LLISTEMPTY;
 	return LLISTNOEMPTY;
 }

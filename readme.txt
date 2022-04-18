@@ -8,7 +8,6 @@ OledExternalDataArr[4]:B相电流；
 OledExternalDataArr[5]:C相电流；
 OledExternalDataArr[6]:设备运行状态
 OledExternalDataArr[7]:通讯模块运行状态
-OledExternalDataArr[38]:功率模块就绪寄存器
 OledExternalDataArr[8]:功率模块1故障寄存器1
 OledExternalDataArr[9]:功率模块2故障寄存器1
 OledExternalDataArr[10]:功率模块3故障寄存器1
@@ -39,3 +38,4 @@ OledExternalDataArr[34]:上次扰动的扰动深度
 OledExternalDataArr[35]:上次扰动录波的发生年月
 OledExternalDataArr[36]:上次扰动录波的发生日时
 OledExternalDataArr[37]:上次扰动录波的发生分秒
+OledExternalDataArr[38]:功率模块就绪寄存器

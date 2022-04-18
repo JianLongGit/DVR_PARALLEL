@@ -7,21 +7,21 @@
 #include "timer.h"
 
 /***************************************
-*函数功能:定时器3初始化
-*输入参数:
+*函数功能: 定时器3初始化
+*输入参数: 
 *输出参数:
-*函数说明:
+*函数说明: 计数一次500us;
 ****************************************/
-void TIM3_Int_Init(u16 arr,u16 psc, u16 DIV)
+void TIM3_Int_Init(void)
 {
 	TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStructure;
 	
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3,ENABLE);  ///使能TIM3时钟
 	
-	TIM_TimeBaseInitStructure.TIM_Period = arr; 	//自动重装载值
-	TIM_TimeBaseInitStructure.TIM_Prescaler=psc;  	//定时器分频
-	TIM_TimeBaseInitStructure.TIM_CounterMode=TIM_CounterMode_Down; //向下计数模式
-	TIM_TimeBaseInitStructure.TIM_ClockDivision=DIV; 
+	TIM_TimeBaseInitStructure.TIM_Period = 65535; 	//自动重装载值
+	TIM_TimeBaseInitStructure.TIM_Prescaler = 42000-1;  	//定时器分频
+	TIM_TimeBaseInitStructure.TIM_CounterMode = TIM_CounterMode_Down; //向下计数模式
+	TIM_TimeBaseInitStructure.TIM_ClockDivision = TIM_CKD_DIV4; 
 	
 	TIM_TimeBaseInit(TIM3,&TIM_TimeBaseInitStructure);//初始化TIM3
 	
@@ -34,16 +34,16 @@ void TIM3_Int_Init(u16 arr,u16 psc, u16 DIV)
 *输出参数:
 *函数说明:
 ****************************************/
-void TIM4_Int_Init(u16 arr,u16 psc, u16 DIV)
+void TIM4_Int_Init(void)
 {
 	TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStructure;
 	
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4,ENABLE);  ///使能TIM4时钟
 	
-	TIM_TimeBaseInitStructure.TIM_Period = arr; 	//自动重装载值
-	TIM_TimeBaseInitStructure.TIM_Prescaler=psc;  //定时器分频
-	TIM_TimeBaseInitStructure.TIM_CounterMode=TIM_CounterMode_Down; //向下计数模式
-	TIM_TimeBaseInitStructure.TIM_ClockDivision=DIV; 
+	TIM_TimeBaseInitStructure.TIM_Period = 65535; 	//自动重装载值
+	TIM_TimeBaseInitStructure.TIM_Prescaler = 84-1;  //定时器分频
+	TIM_TimeBaseInitStructure.TIM_CounterMode = TIM_CounterMode_Down; //向下计数模式
+	TIM_TimeBaseInitStructure.TIM_ClockDivision = TIM_CKD_DIV4; 
 	
 	TIM_TimeBaseInit(TIM4,&TIM_TimeBaseInitStructure);//初始化TIM4
 	

@@ -3,8 +3,8 @@
 
 #include "stm32f4xx.h"
 
-void TIM3_Int_Init(u16 arr,u16 psc, u16 DIV);
-void TIM4_Int_Init(u16 arr,u16 psc, u16 DIV);
+void TIM3_Int_Init(void);
+void TIM4_Int_Init(void);
 
 typedef struct
 {

@@ -18,9 +18,10 @@ uint16_t SetOledI2cData(struct OLEDCTRL *OledCtrlStruct)
 	uint16_t ret = 0;
 	struct OLEDCTRL *Fd = OledCtrlStruct;
 	
-	if(Fd->PageCtrl.SendCompleteLen >= (Fd->NodeData.CtrlInfor.Bits.NeedSendLen))//判断节点数据是否发送完？
+	if(Fd->PageCtrl.SendCompleteLen >= (Fd->NodeData.CtrlInfor.Bits.NeedSendLen))//判断节点数据是否发送完
 	{
-		ret = FetchLinklistData(Fd->LinklistHead,&Fd->NodeData, BackMode);//链表尾部取节点
+		ret = FetchLinklistData(Fd->LinklistHead,&Fd->NodeData);//从链表尾部取节点
+		Fd->PageCtrl.SendCompleteLen = 0;
 		if(ret == LLISTEMPTY)
 		{
 			Fd->Flag.Bits.UpdateDisplayFlag = 0;
@@ -67,7 +68,7 @@ void OledDisplayData(struct OLEDCTRL *OledCtrlStruct)
 	uint16_t TimeFlag;
 	uint16_t WriteFlag;
 
-	TimeFlag = TimeDelay(&Fd->OledI2cCtrl.I2CTimeStamp,5000, TIM3);
+	TimeFlag = TimeDelay(&Fd->OledI2cCtrl.I2CTimeStamp,10000, TIM3);
 
 	switch(TimeFlag)
 	{
@@ -84,11 +85,13 @@ void OledDisplayData(struct OLEDCTRL *OledCtrlStruct)
 			if(SUCCESS == WriteFlag)
 			{
 				TimeStampClear(&Fd->OledI2cCtrl.I2CTimeStamp);
+				return;
 			}
 			break;
 
 		default:	 //IIC发送数据到OLED超时
 			Fd->OledI2cCtrl.OledI2CState = OledI2cLoop; //IIC状态设置为写循环
+			TimeStampClear(&Fd->OledI2cCtrl.I2CTimeStamp);
 			Fd->Flag.Bits.OledFaultFlag = 1;
 			break;
 	}
@@ -96,9 +99,9 @@ void OledDisplayData(struct OLEDCTRL *OledCtrlStruct)
 
 /*******************************************************************************
 * 函数功能: 更新页面控制信息
-* 输入参数: 
+* 输入参数: OledCtrlStruct：OLED控制结构体
 * 输出参数: 无
-* 函数说明: 无
+* 函数说明: 根据按下的按键值，设置反显位置和页面索引
 *******************************************************************************/
 void UpdatePageCtrlInfor(struct OLEDCTRL *OledCtrlStruct)
 {
@@ -143,16 +146,16 @@ void UpdatePageCtrlInfor(struct OLEDCTRL *OledCtrlStruct)
 
 /*******************************************************************************
 * 函数功能: 监测延时时间
-* 输入参数: 
+* 输入参数: OledCtrlStruct：OLED控制结构体
 * 输出参数: 无
-* 函数说明: 无
+* 函数说明: 无按键按下时，5秒刷新一次页面
 *******************************************************************************/
 void DetectionDelayTime(struct OLEDCTRL *OledCtrlStruct)
 {
 	uint16_t i=0;
 	struct OLEDCTRL *Fd = OledCtrlStruct;
 	
-	if(TimeDelay(&Fd->PageUpdateDelay,1000, TIM3) == TimeFinish)//页面刷新时间到，刷新页面。
+	if(TimeDelay(&Fd->PageUpdateDelay,10000, TIM3) == TimeFinish)//页面刷新时间到，刷新页面。
 	{
 		for(i=0; i<PageIndexTable[Fd->PageCtrl.PageIndex.Bits.CurrentIndex].PageInforCtrl.Bits.ItemNum; i++)
 		{
@@ -187,18 +190,19 @@ void ConfigDisplayData(struct OLEDCTRL *OledCtrlStruct)
 		TimeStampClear(&Fd->PageUpdateDelay);//清除页面刷新时间戳
 		if(Fd->PageCtrl.PageIndex.Bits.CurrentIndex != Fd->PageCtrl.PageIndex.Bits.LastIndex)//判断是否需要清屏
 		{
-			ClearScreen(NoNeedInverse);//清屏
-			Fd->PageCtrl.PageIndex.Bits.LastIndex = Fd->PageCtrl.PageIndex.Bits.CurrentIndex;
+			ClearScreen();//清屏
 			Fd->Flag.Bits.AllUpdateFlag = 1;
 			Fd->PageCtrl.InverseLocation = 1;
 		}
-		Fd->PageCtrl.SendCompleteLen = 0xFFF;
-		Fd->Flag.Bits.UpdateDisplayFlag = 1;
-		Fd->NodeData.CtrlInfor.Bits.NeedSendLen=0;
 		for(i=0; i<PageIndexTable[Fd->PageCtrl.PageIndex.Bits.CurrentIndex].PageInforCtrl.Bits.ItemNum; i++)//将要显示的数据插入链表
 		{
 			PageIndexTable[Fd->PageCtrl.PageIndex.Bits.CurrentIndex].Item[i].ItemDisplayFunction();
 		}
+		Fd->PageCtrl.PageIndex.Bits.LastIndex = Fd->PageCtrl.PageIndex.Bits.CurrentIndex;		
+		Fd->PageCtrl.SendCompleteLen = 0xFFF;
+		Fd->Flag.Bits.AllUpdateFlag = 0;
+		Fd->Flag.Bits.UpdateDisplayFlag = 1;
+		Fd->NodeData.CtrlInfor.Bits.NeedSendLen=0;
 	}
 	else
 	{
@@ -213,7 +217,7 @@ void ConfigDisplayData(struct OLEDCTRL *OledCtrlStruct)
 * 输出参数: 无
 * 函数说明: 无
 *******************************************************************************/
-void OledDisplay(struct OLEDCTRL *OledCtrlStruct)
+void OledCtrlFunction(struct OLEDCTRL *OledCtrlStruct)
 {
 	struct OLEDCTRL *Fd = OledCtrlStruct;
 	

@@ -10,25 +10,29 @@
 
 #include "stm32f4xx.h"
 #include "stdlib.h"
-#include "string.h"
 
-//节点
+//数据区
+struct LINKLISTDATATYPE
+{
+	uint16_t *DataAddr[3];	//保存待发送数据的首地址/坐标；
+	union
+	{
+		uint16_t All;
+		struct
+		{
+			uint16_t NeedSendLen: 12; //需要发送的数据长度
+			uint16_t InverseFlag: 1;  //是否反显
+			uint16_t CommandFlag: 2;  //命令/坐标/数据
+			uint16_t Reserve: 1;
+		}Bits;
+	}CtrlInfor;
+};
+
+//链表节点
 struct DOUBLELINKLISTNODE{
-    void *Data;							//数据区指针
+    struct LINKLISTDATATYPE Data;		//数据区
 	struct DOUBLELINKLISTNODE *Next;	//指向下一个节点的指针
 	struct DOUBLELINKLISTNODE *Prev;	//指向上一个节点的指针
-};
-
-//链表头
-struct DOUBLELINKLIST{
-    uint16_t DataSize;						//数据区大小
-	struct DOUBLELINKLISTNODE *HeadNode;	//头节点
-};
-
-//数据插入/取出方式
-enum{
-	FirstMode = 0,
-	BackMode,
 };
 
 //插入/取出数据时可能出现的状态
@@ -40,9 +44,9 @@ enum{
 	FETCHSUCCESS,	//节点取出成功
 };
 
-extern struct DOUBLELINKLIST *LinklistCareate(int size);
-extern uint16_t DataInsertLinklist(struct DOUBLELINKLIST* LinklistHead, const void *Data, uint16_t Mode);
-extern uint16_t FetchLinklistData(struct DOUBLELINKLIST* LinklistHead, void *SaveData, uint16_t Mode);
-extern uint16_t EmptyCheak(struct DOUBLELINKLIST* LinklistHead);
+extern struct DOUBLELINKLISTNODE* LinklistCareate(void);
+extern uint16_t DataInsertLinklist(struct DOUBLELINKLISTNODE* LinklistHead, struct LINKLISTDATATYPE* Data);
+extern uint16_t FetchLinklistData(struct DOUBLELINKLISTNODE* LinklistHead, struct LINKLISTDATATYPE* SaveData);
+extern uint16_t EmptyCheak(struct DOUBLELINKLISTNODE* LinklistHead);
 
 #endif

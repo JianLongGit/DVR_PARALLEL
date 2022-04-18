@@ -9,7 +9,6 @@
 #define KEY_H_
 
 #include "timer.h"
-#include "string.h"
 
 #define KEY_RETURN_VALUE	0x1
 #define KEY_ENTER_VALUE 	0x2

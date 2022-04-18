@@ -23,12 +23,11 @@ void OledKeyInit(void)
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0|GPIO_Pin_1|GPIO_Pin_2|GPIO_Pin_3;
 	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;//外部已经默认下拉；
 	GPIO_Init(GPIOC,&GPIO_InitStructure);	
-
 }
 
 /*******************************************************************************
 * 函数功能: 按键IO口扫描
-* 输入参数: 
+* 输入参数: KeyCtrlSt：按键控制结构体
 * 输出参数:
 * 函数说明:
 *******************************************************************************/
@@ -39,16 +38,16 @@ void OledKeyIOScan(struct KEYCONTROL *KeyCtrlSt)
 
 /*******************************************************************************
 * 函数功能: 按键检测
-* 输入参数: 
+* 输入参数: KeyCtrlSt：按键控制结构体
 * 输出参数:
 * 函数说明:
 *******************************************************************************/
 void OledKeyDetection(struct KEYCONTROL *KeyCtrlSt)
 {
-	if(KeyCtrlSt->KEYSTATE.Bits.KeyIOValue == KeyCtrlSt->KEYSTATE.Bits.TempKeyValue)
+	if(KeyCtrlSt->KEYSTATE.Bits.KeyIOValue == KeyCtrlSt->KEYSTATE.Bits.TempKeyValue)//当前按键值和上一次的按键值相同
 	{
 
-		if(TimeDelay(&KeyCtrlSt->KeyDelayTime,50,TIM3) == TimeFinish)
+		if(TimeDelay(&KeyCtrlSt->KeyDelayTime,200,TIM3) == TimeFinish)//100ms消抖时间到
 		{
 			KeyCtrlSt->KEYSTATE.Bits.KeyValue = KeyCtrlSt->KEYSTATE.Bits.TempKeyValue;
 		}
@@ -56,7 +55,7 @@ void OledKeyDetection(struct KEYCONTROL *KeyCtrlSt)
 	}
 	else if(KeyCtrlSt->KEYSTATE.Bits.KeyIOValue != 0)
 	{
-		if((KeyCtrlSt->KEYSTATE.Bits.KeyIOValue & (KeyCtrlSt->KEYSTATE.Bits.KeyIOValue-1))== 0)
+		if((KeyCtrlSt->KEYSTATE.Bits.KeyIOValue & (KeyCtrlSt->KEYSTATE.Bits.KeyIOValue-1))== 0)//只有一个按键按下
 		{
 			KeyCtrlSt->KEYSTATE.Bits.TempKeyValue = KeyCtrlSt->KEYSTATE.Bits.KeyIOValue;
 		}

@@ -1,87 +1,81 @@
+/*
+ * oledconfig.h
+ *
+ *  Created on: 2022-04-18
+ *      Author: WangJianLong
+ */
 #ifndef OLED_CONFIG_
 #define OLED_CONFIG_
 
-#include "stm32f4xx.h"
-#include "stdlib.h"
+#include "key.h"
+#include "string.h"
 #include "olediic.h"
 #include "linklist.h"
-#include "key.h"	
+#include "stm32f4xx.h"
 
+//OLED的数据类型
 enum OLEDCOMMANDFLAG{
-	OledCommand = 0,	
-	OledLocation,
-	OledData,	
+	OledCommand = 0,	//命令
+	OledLocation,		//坐标
+	OledData,			//数据
 };
+
 
 enum OLEDINVERSEFLAG{
-	NoNeedInverse = 0,
-	NeedInverse,
+	NoNeedInverse = 0,	//不反显
+	NeedInverse,		//反显
 };
 
-//数据区
-struct LINKLISTDATATYPE
-{
-	uint16_t *DataAddr[3];
-	union
-	{
-		uint16_t All;
-		struct
-		{
-			uint16_t NeedSendLen: 12;
-			uint16_t InverseFlag: 1;
-			uint16_t CommandFlag: 2;
-			uint16_t Reserve: 1;
-		}Bits;
-	}CtrlInfor;
-};
-
+//页面控制结构体
 struct OLEDPAGECTRL
 {
-	uint16_t SendCompleteLen;
-	uint16_t InverseLocation;
+	uint16_t SendCompleteLen;		//当前节点已发送完成的数据长度
+	uint16_t InverseLocation;		//当前反显位置
+	uint16_t SelectModuleNumber;	//选择的模块编号
 	union 
 	{
 		uint16_t All;
 		struct
 		{
-			uint16_t CurrentIndex: 8;
-			uint16_t LastIndex: 8;
+			uint16_t CurrentIndex: 8;	//当前页面索引
+			uint16_t LastIndex: 8;		//上一次页面索引
 		}Bits;
 	}PageIndex;			
 };
 
+//OLED标志位结构体
 union OLEDFLAG
 {
 	uint16_t All;
 	struct
 	{
-		uint16_t AllUpdateFlag: 1;
-		uint16_t UpdateDisplayFlag: 1;
-		uint16_t OledFaultFlag: 1;
-		uint16_t OledMallocFaultFlag: 1;//测试用
+		uint16_t AllUpdateFlag: 1;		//全部更新标志位
+		uint16_t UpdateDisplayFlag: 1;	//更新显示标志位
+		uint16_t OledFaultFlag: 1;		//OLED故障标志位（内存泄露 or iic超时）
 		uint16_t Reserve: 12;
 	}Bits;
 };
 
+//OLED控制结构体
 struct OLEDCTRL
 {
-	union  OLEDFLAG	Flag;
-	struct KEYCONTROL KeyCtrl;
-	struct OLEDPAGECTRL PageCtrl;
-	struct DOUBLELINKLIST *LinklistHead;
-	struct LINKLISTDATATYPE NodeData;
-	struct OLEDI2CSTRUCT OledI2cCtrl;
-	TIMESTAMPINFO PageUpdateDelay;
+	union  OLEDFLAG	Flag;					//OLED标志位结构体
+	struct KEYCONTROL KeyCtrl;				//按键控制结构体
+	struct OLEDPAGECTRL PageCtrl;			//页面控制结构体
+	struct DOUBLELINKLISTNODE* LinklistHead;//链表头
+	struct LINKLISTDATATYPE NodeData;		//保存取出的节点数据
+	struct OLEDI2CSTRUCT OledI2cCtrl;		//IIC控制结构体
+	TIMESTAMPINFO PageUpdateDelay;			//页面更新时间戳
 };
 
-//显示项目的结构体（一个页面包含多个项目）
+//项目结构体（一个页面包含多个项目）
 struct ITEMSTRUCT {
-	void (*ItemDisplayFunction)(void); // 当前项目显示函数；
-	void (*ItemEnterFunction)(void); // 选择当前项目时执行的功能函数；
-	uint16_t ItemEnterKeyIndex; 	 //当前项目的确定索引；
+	void (*ItemDisplayFunction)(void);	// 当前项目显示函数；
+	void (*ItemEnterFunction)(void);	// 选择当前项目时执行的功能函数；
+	uint16_t ItemEnterKeyIndex;			//当前项目的确定索引；
 };
 
-//显示页面的结构体数组
+//页面结构体
 struct OLEDPAGESTRUCT {
 	struct ITEMSTRUCT *Item;					//项目指针;
 	union
@@ -104,6 +98,7 @@ struct OLEDPAGESTRUCT {
 	}PageInforCtrl;
 };
 
+//各页面索引
 enum
 {
 	HomePageIndex = 0,
@@ -116,18 +111,13 @@ enum
 	CommModInforPage3Index,
 	PowerModInforPage1Index,
 };
-extern struct OLEDPAGESTRUCT PageIndexTable[];
 
-extern struct ITEMSTRUCT HomePageItem[];
-extern struct ITEMSTRUCT ModuleSeletionPage1[];
-extern struct ITEMSTRUCT ModuleSeletionPage2[];
-extern struct ITEMSTRUCT ModResetPage1[];
-extern struct ITEMSTRUCT ModResetPage2[];
-extern struct ITEMSTRUCT CommModInforPage1[];
-extern struct ITEMSTRUCT CommModInforPage2[];
-extern struct ITEMSTRUCT CommModInforPage3[];
-extern struct ITEMSTRUCT  PowerModInforPage1[];
+extern uint16_t OledExternalDataArr[39];
+
+extern struct OLEDPAGESTRUCT PageIndexTable[];
 extern struct OLEDCTRL OledCtrl;
-extern void ClearScreen(uint16_t InverseFlag);
+
+extern void ClearScreen(void);
+extern void OledInit(void);
 
 #endif

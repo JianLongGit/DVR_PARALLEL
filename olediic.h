@@ -8,10 +8,9 @@
 #ifndef OLEDI2C_H_
 #define OLEDI2C_H_
 
-#include "stm32f4xx_i2c.h"
-#include "stm32f4xx.h"
 #include "timer.h"
-#include "string.h"
+#include "stm32f4xx.h"
+#include "stm32f4xx_i2c.h"
 
 #define OLEDSLAVEADDR 0x78
 

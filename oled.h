@@ -7,7 +7,7 @@
 
 #define OLEDSlaveAddr	0x78
 
-extern void OledDisplay(struct OLEDCTRL *OledCtrlStruct);
+extern void OledCtrlFunction(struct OLEDCTRL *OledCtrlStruct);
 extern void OledStructInit(void);
 
 void OledClean(void);

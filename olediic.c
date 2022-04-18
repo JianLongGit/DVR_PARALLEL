@@ -35,9 +35,7 @@ void I2C1_Init(void)
 	GPIO_PinAFConfig(GPIOB, GPIO_PinSource9, GPIO_AF_I2C1);
 
 	I2C_SoftwareResetCmd(I2C1, ENABLE);//复位IIC
-	__NOP(); //延时3个周期
-	__NOP(); 
-	__NOP(); 
+	__NOP(); //延时1个机械周期
 	I2C_SoftwareResetCmd(I2C1, DISABLE);//取消复位，清除busy
 	
 	//IIC参数配置
@@ -55,7 +53,7 @@ void I2C1_Init(void)
 
 /*******************************************************************************
  *函数功能:	OLED I2C发送函数
- *输入参数:	
+ *输入参数:	OledI2CCtrl: olediic控制结构体
  *输出参数:	
  *函数说明:	
 *******************************************************************************/
@@ -109,7 +107,7 @@ uint16_t OledI2CSendData(struct OLEDI2CSTRUCT *OledI2CCtrl)
 			}
 			return BUSY;
 			
-		case OledI2cLoop:
+		case OledI2cLoop://IIC发送超时，进入写循环状态
 			return BUSY;
 		
 		default:
